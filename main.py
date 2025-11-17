@@ -19,7 +19,7 @@ def plot_storage_fill():
     plt.xticks(rotation=0)
     plt.show()
     plt.savefig('storage_fill.png')
-    print("График сохранён как storage_fill.png")
+    print('График сохранён как storage_fill.png')
 
 def plot_total_items():
     total_items = df.groupby('Название')['Количество'].sum()
@@ -31,7 +31,7 @@ def plot_total_items():
     plt.tight_layout()
     plt.show()
     plt.savefig('total_items.png')
-    print("График сохранён как total_items.png")
+    print('График сохранён как total_items.png')
 
 def plot_storage_cost():
     st = input('Введите склад для расчета стоимости: ')
@@ -47,7 +47,7 @@ def plot_storage_cost():
     plt.tight_layout()
     plt.show()
     plt.savefig(f'storage_{st}_cost.png')
-    print(f"График сохранён как storage_{st}_cost.png")
+    print(f'График сохранён как storage_{st}_cost.png')
 
 def plot_category_share():
     df_copy = df.copy()
@@ -58,7 +58,7 @@ def plot_category_share():
     plt.ylabel('')
     plt.show()
     plt.savefig('category_share.png')
-    print("График сохранён как category_share.png")
+    print('График сохранён как category_share.png')
 
 def show_all():
     print(df)
@@ -369,6 +369,16 @@ def filter_by_price():
     except:
         pass
 
+def export_to_csv():
+    filename = input('Введите имя файла для сохранения (например, data.csv): ')
+    filename += '.csv'
+    try:
+        df.to_csv(filename, index=False, encoding='utf-8')
+        print(f'Данные успешно сохранены в файл {filename}')
+    except:
+        print('Ошибка при сохранении файла! Попробуйсте другое имя')
+
+
 
 while True:
     print('\nДоступные команды (0-10):')
@@ -383,6 +393,7 @@ while True:
     print('9 — товары с мин/макс ценой на складе')
     print('10 — фильтрация по диапазону цены')
     print('11 — визуализация складов')
+    print('12 — Экспорт данных в CSV')
     print('0 — выйти\n')
 
     command = input('Введите номер команды: ').strip()
@@ -433,6 +444,9 @@ while True:
             plot_category_share()
         else:
             print('Команда не распознана!')
+
+    elif command == '12':
+        export_to_csv()
 
     elif command == '0':
         break
