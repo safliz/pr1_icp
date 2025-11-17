@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 df = pd.DataFrame({
     'Название': [f'Товар_{i}' for i in range(1, 21)],
@@ -8,6 +9,56 @@ df = pd.DataFrame({
     'Цена за единицу': np.random.randint(100, 5000, 20),
     'Складское помещение': np.random.choice( ['1','2','3'], 20)
 })
+
+def plot_storage_fill():
+    storage_sum = df.groupby('Складское помещение')['Количество'].sum()
+    storage_sum.plot(kind='bar', color='pink')
+    plt.title('Заполненность складов (сумма товаров)')
+    plt.xlabel('Склад')
+    plt.ylabel('Количество товаров')
+    plt.xticks(rotation=0)
+    plt.show()
+    plt.savefig('storage_fill.png')
+    print("График сохранён как storage_fill.png")
+
+def plot_total_items():
+    total_items = df.groupby('Название')['Количество'].sum()
+    total_items.plot(kind='bar', color='pink')
+    plt.title('Количество каждого товара на всех складах')
+    plt.xlabel('Товар')
+    plt.ylabel('Суммарное количество')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.show()
+    plt.savefig('total_items.png')
+    print("График сохранён как total_items.png")
+
+def plot_storage_cost():
+    st = input('Введите склад для расчета стоимости: ')
+    subset = df[df['Складское помещение'] == st].copy()
+    if subset.empty:
+        print('Такого склада нет!')
+        return
+    subset['Стоимость'] = subset['Цена за единицу'] #* subset['Количество']
+    subset.plot(x='Название', y='Стоимость', kind='bar', color='orange', legend=False)
+    plt.title(f'Стоимость товаров на складе {st}')
+    plt.xlabel('Товар')
+    plt.ylabel('Стоимость')
+    plt.tight_layout()
+    plt.show()
+    plt.savefig(f'storage_{st}_cost.png')
+    print(f"График сохранён как storage_{st}_cost.png")
+
+def plot_category_share():
+    df_copy = df.copy()
+    df_copy['Стоимость'] = df_copy['Количество'] * df_copy['Цена за единицу']
+    category_sum = df_copy.groupby('Категория')['Стоимость'].sum()
+    category_sum.plot(kind='pie', autopct='%1.1f%%', startangle=90)
+    plt.title('Доля категорий в общей стоимости товаров')
+    plt.ylabel('')
+    plt.show()
+    plt.savefig('category_share.png')
+    print("График сохранён как category_share.png")
 
 def show_all():
     print(df)
@@ -331,6 +382,7 @@ while True:
     print('8 — заказать товар')
     print('9 — товары с мин/макс ценой на складе')
     print('10 — фильтрация по диапазону цены')
+    print('11 — визуализация складов')
     print('0 — выйти\n')
 
     command = input('Введите номер команды: ').strip()
@@ -365,8 +417,26 @@ while True:
     elif command == '10':
         filter_by_price()
 
+    elif command == '11':
+        print('\n1 — Диаграмма заполненности складов')
+        print('2 — График числа товаров')
+        print('3 — График стоимости товаров на складе')
+        print('4 — Круговая диаграмма доли категорий\n')
+        choice = input('Выберите график (1-4):')
+        if choice == '1':
+            plot_storage_fill()
+        elif choice == '2':
+            plot_total_items()
+        elif choice == '3':
+            plot_storage_cost()
+        elif choice == '4':
+            plot_category_share()
+        else:
+            print('Команда не распознана!')
+
     elif command == '0':
         break
 
     else:
         print('Команда не распознана! Попробуйте снова')
+
