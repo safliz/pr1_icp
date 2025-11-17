@@ -10,7 +10,15 @@ df = pd.DataFrame({
     'Складское помещение': np.random.choice( ['1','2','3'], 20)
 })
 
+from datetime import datetime
+
+def log_action(message):
+    with open('log.txt', 'a', encoding='utf-8') as f:
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        f.write(f'{now} — {message}\n')
+
 def plot_storage_fill():
+    log_action('Построение графика: заполненность складов')
     storage_sum = df.groupby('Складское помещение')['Количество'].sum()
     storage_sum.plot(kind='bar', color='pink')
     plt.title('Заполненность складов (сумма товаров)')
@@ -22,6 +30,7 @@ def plot_storage_fill():
     print('График сохранён как storage_fill.png')
 
 def plot_total_items():
+    log_action('Построение графика: число товаров (сумма на всех складах)')
     total_items = df.groupby('Название')['Количество'].sum()
     total_items.plot(kind='bar', color='pink')
     plt.title('Количество каждого товара на всех складах')
@@ -35,6 +44,7 @@ def plot_total_items():
 
 def plot_storage_cost():
     st = input('Введите склад для расчета стоимости: ')
+    log_action(f'Построение графика: стоимость товаров на складе {st}')
     subset = df[df['Складское помещение'] == st].copy()
     if subset.empty:
         print('Такого склада нет!')
@@ -51,6 +61,7 @@ def plot_storage_cost():
 
 def plot_category_share():
     df_copy = df.copy()
+    log_action('Построение круговой диаграммы: доля категорий в общей стоимости всех товаров')
     df_copy['Стоимость'] = df_copy['Количество'] * df_copy['Цена за единицу']
     category_sum = df_copy.groupby('Категория')['Стоимость'].sum()
     category_sum.plot(kind='pie', autopct='%1.1f%%', startangle=90)
@@ -61,6 +72,7 @@ def plot_category_share():
     print('График сохранён как category_share.png')
 
 def show_all():
+    log_action('Просмотр всей таблицы')
     print(df)
 
 
@@ -95,6 +107,7 @@ def add_product():
     if matches.empty:
         df.loc[len(df)] = [name, category, quantity, price, storage]
         print('Товар успешно добавлен!')
+        log_action(f'Добавлен товар: {name}, склад {storage}, количество {quantity}, цена {price}')
         return
 
     for idx, row in matches.iterrows():
@@ -105,6 +118,7 @@ def add_product():
         if  row['Цена за единицу'] == price and row['Складское помещение'] == storage:
             df.loc[idx, 'Количество'] += quantity
             print('Такой товар уже существует на данном складе. Количество товара увеличено!')
+            log_action(f'Количество товара {name} на складе {storage} увеличено на {quantity}')
             return
         
         if  row['Цена за единицу'] != price and row['Складское помещение'] == storage:
@@ -124,6 +138,7 @@ def remove_product():
     if name in df['Название'].values:
         df.drop(df[df['Название'] == name].index, inplace=True)
         print('Товар успешно удален')
+        log_action(f'Удалён товар: {name}')
     else:
         print('Товар не найден. Список доступных для удаления товаров доступен по команде show')
 
@@ -154,6 +169,7 @@ def change_quantity():
 
     df.loc[(df['Название'] == name) & (df['Складское помещение'] == storage),'Количество'] = new_q
     print('Количество обновлено!')
+    log_action(f'Изменено количество: {name} на складе {storage} → {new_q}')
 
 
 def change_price():
@@ -183,6 +199,7 @@ def change_price():
     if mode == 'да':
         df.loc[df['Название'] == name, 'Цена за единицу'] = new_price
         print('Цена успешно изменена на всех складах!')
+        log_action(f'Изменена цена товара {name}: новая цена {new_price}')
         return
 
     storage = input('Склад: ')
@@ -194,11 +211,13 @@ def change_price():
     df.loc[
         (df['Название'] == name) &(df['Складское помещение'] == storage),'Цена за единицу'] = new_price
     print('Цена успешно изменена на выбранном складе!')
+    log_action(f'Изменена цена товара {name}: новая цена {new_price}')
 
 
 def stats():
     '''статистика'''
 
+    log_action('Просмотр статистики')
     print('1 — Общая стоимость всех товаров')
     print('2 — Средняя цена по категориям')
     print('3 — ТОП-5 самых дорогих')
@@ -208,7 +227,7 @@ def stats():
         choice = input('Выберите пункт (1-5): ').strip()
         if choice in ('1','2', '3', '4', '5'):
             break
-
+    
     if choice == '1':
         total = (df['Количество'] * df['Цена за единицу']).sum()
         print('Общая стоимость всех товаров:', total)
@@ -244,6 +263,7 @@ def filter_data():
         if f in ('категория', 'склад'):
             break
 
+    log_action(f'Фильтрация по {f}')
     if f == 'категория':
         cat = input('Введите категорию: ').strip()
         if cat not in df['Категория'].unique():
@@ -273,12 +293,14 @@ def order_products():
                     print('Такого товара нет в базе данных! Повторите ввод')
                 else:
                     break
-
+            
+            log_action(f'Оформление заказа: {name}')
             if available['Количество'].sum() == 0:
                 print('Товар закончился! Информация сохранена в out.txt')
                 with open('C:\\Users\\Liza\\Downloads\\ицп\\out.txt', 'a', encoding='utf-8') as f:
                     f.write(f'{name} — закончился\n')
-            
+                log_action(f'{name} — закончился, запись в out.txt')
+
             else:
                 if len(available) > 1:
                     print('Товар есть на нескольких складах:')
@@ -298,7 +320,7 @@ def order_products():
                     print('На выбранном складе товара нет! Информация сохранена в out.txt')
                     with open('C:\\Users\\Liza\\Downloads\\ицп\\out.txt', 'a', encoding='utf-8') as f:
                         f.write(f'{name} — закончился на складе {st}\n')
-
+                    log_action(f'{name} — закончился на складе, запись в out.txt')
                 else:
                     while True:
                         print(f'\nВ наличии: {current_q}')
@@ -317,6 +339,7 @@ def order_products():
 
                     df.loc[row.index, 'Количество'] = current_q - amount
                     print('Заказ успешно оформлен!')
+                    log_action(f'Заказ оформлен: {name}, {amount} шт., склад {st}')
         except:
             print('Ошибка ввода.')
 
@@ -337,6 +360,7 @@ def min_max_price_storage():
         print('Такого склада нет в базе данных!')
         return
     
+    log_action(f'Запрос min/max цен на складе {st}')
     print('Максимальная цена:')
     print(subset.nlargest(1, 'Цена за единицу'))
     print('\nМинимальная цена:')
@@ -359,6 +383,7 @@ def filter_by_price():
                 continue
             break
         
+        log_action(f'Фильтрация по цене: {low} - {high}')
         result = df[(df['Цена за единицу'] >= low) & (df['Цена за единицу'] <= high)]
 
         if result.empty:
@@ -375,6 +400,7 @@ def export_to_csv():
     try:
         df.to_csv(filename, index=False, encoding='utf-8')
         print(f'Данные успешно сохранены в файл {filename}')
+        log_action(f'Экспорт данных в CSV: {filename}')
     except:
         print('Ошибка при сохранении файла! Попробуйсте другое имя')
 
