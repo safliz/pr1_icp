@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from termcolor import colored
+from WB import order
 
 df = pd.DataFrame({
     'Название': [f'Товар_{i}' for i in range(1, 21)],
@@ -422,7 +423,7 @@ while True:
     print('5 — изменить цену товара')
     print('6 — статистика')
     print('7 — фильтрация по категории или складу')
-    print('8 — заказать товар')
+    print('8 — WILDBERRIES')
     print('9 — товары с мин/макс ценой на складе')
     print('10 — фильтрация по диапазону цены')
     print('11 — визуализация складов')
@@ -453,7 +454,8 @@ while True:
         filter_data()
 
     elif command == '8':
-        order_products()
+        log_action('Заход на WB')
+        log_action(order(df))
 
     elif command == '9':
         min_max_price_storage()

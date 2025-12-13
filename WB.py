@@ -1,3 +1,5 @@
+from receipt import make_receipt
+
 def order(df):
     """
     заказ и корзина
@@ -56,7 +58,6 @@ def order(df):
             cart[key] = {'Количество': q, 'Цена': price}
 
         print('\033[38;5;218mТовар добавлен в корзину! \033[0m')
-###########################################################
 
         while True:
             print('\n\033[37;48;5;129mДоступные действия: \033[0m')
@@ -150,75 +151,11 @@ def order(df):
                 print('\033[38;5;218mТовар удален!')
 
             elif cmd == '4':
-                print('\033[1;37;48;5;129m З а к а з   п о д т в е р ж д е н ! \033[0m')
+                print('\033[1;37;48;5;129m З а к а з     п о д т в е р ж д е н ! \033[0m')
+                log= 'Оформлен заказ на вбшке на сумму ' + str(total_sum)
 
-                # ЧЕК
-
+                receipt_file = make_receipt(cart, total_sum)
+                print(f'\033[38;5;218mЧек сохранён: {receipt_file}')
                 for (name, st), info in cart.items():
                     df.loc[(df['Название'] == name) & (df['Складское помещение'] == st), 'Количество'] -= info['Количество']
-                return 
-            
-def add_product(df):
-    '''добавить'''
-    name = input('\033[38;5;229mНазвание:\033[0m ')
-    category = input('\033[38;5;229mКатегория:\033[0m ')
-    storage = input('\033[38;5;229mСклад:\033[0m ')
-
-    while True:
-        q = input('\033[38;5;229mКоличество (целое число >= 0):\033[0m ')
-        try:
-            quantity = int(q)
-            if quantity >= 0:
-                break
-        except:
-            pass
-
-    while True:
-        p = input('\033[38;5;229mЦена (число >= 0): \033[0m')
-        try:
-            price = float(p)
-            if price >= 0:
-                break
-        except:
-            pass
-
-
-    matches = df[df['Название'] == name]
-
-    if matches.empty:
-        df.loc[len(df)] = [name, category, quantity, price, storage]
-        print('\033[38;5;118mТовар успешно добавлен!')
-        return
-
-    for idx, row in matches.iterrows():
-        if row['Категория'] != category:
-            print('\033[31mТовар с таким названием уже существует, но его категория отличается! Добавление отменено')
-            return
-        
-        if  row['Цена за единицу'] == price and row['Складское помещение'] == storage:
-            df.loc[idx, 'Количество'] += quantity
-            print('\033[38;5;118mТакой товар уже существует на данном складе. Количество товара увеличено!')
-            return
-        
-        if  row['Цена за единицу'] != price and row['Складское помещение'] == storage:
-            df.loc[idx, 'Количество'] += quantity
-            print('\033[31mТакой товар уже существует на данном складе, но его цена отличается! Добавление отменено')
-            return
-
-        df.loc[len(df)] = [name, category, quantity, price, storage]
-        print('\033[38;5;118mТовар добавлен на новый склад!')
-        return
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from termcolor import colored
-df = pd.DataFrame({
-    'Название': [f'Товар_{i}' for i in range(1, 21)],
-    'Категория': np.random.choice(['обувь', 'одежда', 'продукты', 'техника', 'игрушки'], 20),
-    'Количество': np.random.randint(1, 100, 20),
-    'Цена за единицу': np.random.randint(100, 5000, 20),
-    'Складское помещение': np.random.choice( ['1','2','3'], 20)
-})
-print(df)
-add_product(df)
-order(df)
+                return log
