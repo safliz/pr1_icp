@@ -326,7 +326,7 @@ def order_products():
 
                 if current_q == 0:
                     print('\033[31mНа выбранном складе товара нет! Информация сохранена в out.txt')
-                    with open('C:\\Users\\Liza\\Downloads\\ицп\\out.txt', 'a', encoding='utf-8') as f:
+                    with open('out.txt', 'a', encoding='utf-8') as f:
                         f.write(f'{name} — закончился на складе {st}\n')
                     log_action(f'{name} — закончился на складе, запись в out.txt')
                 else:
